@@ -165,6 +165,10 @@ class ImageHandler:
                 if url.path.endswith('.svg'):
                     continue
 
+                # Add WebP support
+                if url.path.endswith('.webp'):
+                    debug("detected WebP image url", rel_p)
+
                 debug("image url", rel_p)
                 data = ImageHandler.urldata[view.id()].get(rel_p)
                 if not data:
@@ -215,7 +219,6 @@ class ImageHandler:
                 # in settings.
                 if base_path:
                     path = os.path.join(base_path, path)
-
                 if not os.path.isabs(path):
                     folder = get_path_for(view)
                     path = os.path.join(folder, path)
@@ -252,6 +255,12 @@ class ImageHandler:
             if not ttype:
                 debug("unknown ttype")
                 continue
+
+            # Handle both jpeg and jpg extensions
+            if ttype == "jpeg":
+                debug("handling jpeg/jpg image")
+                if img.lower().endswith('.jpg'):
+                    ttype = "jpg"
 
             line_region = view.line(region)
             zoom, width, height, imgattr = check_imgattr(view, line_region, region)
@@ -402,7 +411,7 @@ def get_image_size(f):
         width, height = struct.unpack('<HH', head[6:10])
     elif imghdr.what('', head) == 'jpeg':
         debug('detected jpeg')
-        ttype = "jpeg"
+        ttype = "jpeg"  # 添加 ttype 设置
         try:
             f.seek(0)  # Read 0xff next
             size = 2
@@ -421,6 +430,7 @@ def get_image_size(f):
             debug("determining jpeg image size failed", e)
             return None, None, ttype
     elif head.startswith(b"RIFF") and head[8:12] == b"WEBP":
+        debug('detected webp')
         ttype = "webp"
         head += f.read(7)
         if head[12:16] == b"VP8 ":

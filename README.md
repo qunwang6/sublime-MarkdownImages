@@ -1,4 +1,6 @@
 # Markdown Images
+**更新**
+* 添加webp格式显示
 
 This is a Sublime Text 3 plugin to render images inside of markdown files.
 
